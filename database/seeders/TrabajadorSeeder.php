@@ -11,8 +11,8 @@ class TrabajadorSeeder extends Seeder
     public function run(): void
     {
         $trabajadores = [
-            ['nombre' => 'Trabajador Comedor 1', 'email' => 'trabajador1@unac.edu.pe'],
-            ['nombre' => 'Trabajador Comedor 2', 'email' => 'trabajador2@unac.edu.pe'],
+            ['nombre' => 'Trabajador Comedor 1', 'email' => 'trabajador1@unac.edu.pe', 'username' => 'trabajador1'],
+            ['nombre' => 'Trabajador Comedor 2', 'email' => 'trabajador2@unac.edu.pe', 'username' => 'trabajador2'],
         ];
 
         foreach ($trabajadores as $t) {
@@ -20,7 +20,8 @@ class TrabajadorSeeder extends Seeder
                 ['email' => $t['email']],
                 [
                     'nombre' => $t['nombre'],
-                    'password' => 'Trabajador123!',
+                    'username' => $t['username'],
+                    'password' => 'trabajador123',
                     'rol' => 'trabajador',
                     'activo' => true,
                 ]

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 120);
             $table->string('email', 150)->unique();
+            $table->string('username', 100)->unique();
             $table->string('password');
             $table->enum('rol', ['administrador', 'trabajador']);
             $table->boolean('activo')->default(true);

@@ -11,10 +11,12 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         UsuarioSistema::firstOrCreate(
-            ['email' => 'admin@unac.edu.pe'],
+            ['email' => 'admin@unac.edu.pe'
+            ],
             [
                 'nombre' => 'Administrador Comedor',
-                'password' => 'CambiarEstaClave123!', // se hashea solo (cast 'hashed')
+                'username' => 'admin',
+                'password' => 'admin123', // se hashea solo (cast 'hashed')
                 'rol' => 'administrador',
                 'activo' => true,
             ]
