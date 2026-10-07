@@ -21,6 +21,8 @@ return new class extends Migration
             $table->enum('dia_semana', ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']);
             $table->time('hora_inicio');
             $table->time('hora_fin');
+            $table->date('fecha_inicio')->nullable();
+            $table->date('fecha_fin')->nullable();
             $table->string('aula', 30)->nullable();
             $table->timestamps();
 

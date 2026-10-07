@@ -11,7 +11,7 @@ class PeriodoAcademicoSeeder extends Seeder
     public function run(): void
     {
         PeriodoAcademico::firstOrCreate(
-            ['nombre' => '2026-A'],
+            ['nombre' => '2026-B'],
             [
                 'fecha_inicio' => '2026-03-16',
                 'fecha_fin' => '2026-07-25',

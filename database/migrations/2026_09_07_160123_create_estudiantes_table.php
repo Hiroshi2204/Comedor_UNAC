@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('estudiantes', function (Blueprint $table) {
             $table->id();
-            $table->string('codigo_universitario', 20)->unique();
-            $table->string('dni', 15)->nullable();
+            $table->string('codigo_universitario', 50)->unique();
+            $table->string('dni', 15)->nullable()->index();
             $table->string('nombres', 120);
             $table->string('apellidos', 120);
             $table->string('email_institucional', 150)->nullable();

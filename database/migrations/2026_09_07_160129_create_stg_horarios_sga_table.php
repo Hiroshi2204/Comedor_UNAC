@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('stg_horarios_sga', function (Blueprint $table) {
             $table->id();
+            $table->string('edu_seccion_id', 40)->nullable()->index();
+            $table->string('edu_particion_id', 40)->nullable();
+            $table->string('tipo', 5)->nullable();
+            $table->date('fecha_inicio')->nullable();
+            $table->date('fecha_fin')->nullable();
             $table->string('periodo_academico', 20);
             $table->string('escuela', 150);
             $table->string('seccion', 30)->nullable();
@@ -26,7 +31,7 @@ return new class extends Migration
             $table->string('aula', 30)->nullable();
             $table->string('sede', 60)->nullable();
             $table->integer('n_matriculados')->nullable();
-            $table->string('archivo_origen', 255);
+            $table->string('archivo_origen', 255)->default('API SGA');
             $table->timestamp('cargado_en')->useCurrent();
         });
     }

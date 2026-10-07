@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('ventanas_atencion', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 40); // ej. "Grupo A"
+            $table->enum('servicio', ['desayuno', 'almuerzo', 'cena']);
             $table->time('hora_inicio');
             $table->time('hora_fin');
             $table->integer('capacidad_maxima')->nullable();
             $table->boolean('activo')->default(true);
+            $table->unique(['servicio', 'hora_inicio']);
             $table->timestamps();
         });
     }

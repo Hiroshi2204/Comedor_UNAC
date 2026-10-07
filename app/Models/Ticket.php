@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Ticket extends Model
 {
@@ -14,19 +15,22 @@ class Ticket extends Model
         'ticket_origen_id',
         'trabajador_id',
         'tipo',
+        'servicio',
         'fecha',
         'estado',
         'codigo_qr',
-        'canal_envio',
-        'fecha_hora_envio',
         'fecha_hora_recojo',
     ];
 
     protected $casts = [
         'fecha' => 'date',
-        'fecha_hora_envio' => 'datetime',
         'fecha_hora_recojo' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(fn($t) => $t->codigo_qr ??= Str::random(40));
+    }
 
     public function estudiante()
     {
@@ -67,10 +71,5 @@ class Ticket extends Model
     public function inasistencia()
     {
         return $this->hasOne(Inasistencia::class);
-    }
-
-    public function logsWhatsapp()
-    {
-        return $this->hasMany(LogNotificacionWhatsapp::class);
     }
 }

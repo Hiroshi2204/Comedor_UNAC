@@ -22,16 +22,15 @@ return new class extends Migration
             $table->foreignId('trabajador_id')->nullable()
                 ->constrained('usuarios_sistema')->nullOnDelete();
             $table->enum('tipo', ['becado', 'no_becado']);
+            $table->enum('servicio', ['desayuno', 'almuerzo', 'cena']);
             $table->date('fecha');
-            $table->enum('estado', ['generado', 'enviado', 'cancelado', 'recogido', 'no_recogido', 'vencido'])
-                ->default('generado');
+            $table->enum('estado', ['generado', 'cancelado', 'recogido', 'no_recogido', 'vencido'])
+     ->default('generado');
             $table->string('codigo_qr', 64)->unique();
-            $table->string('canal_envio', 20)->nullable();
-            $table->dateTime('fecha_hora_envio')->nullable();
             $table->dateTime('fecha_hora_recojo')->nullable();
             $table->timestamps();
 
-            $table->unique(['estudiante_id', 'fecha']); // un solo ticket por alumno y día
+            $table->unique(['estudiante_id', 'fecha', 'servicio']);
         });
     }
 

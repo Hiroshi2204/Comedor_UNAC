@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class Estudiante extends Model
 {
+    use Notifiable;
     protected $fillable = [
         'codigo_universitario',
         'dni',
