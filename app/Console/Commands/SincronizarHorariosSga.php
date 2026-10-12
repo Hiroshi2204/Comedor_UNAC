@@ -25,7 +25,7 @@ class SincronizarHorariosSga extends Command
         $escuelas = json_decode(file_get_contents($ruta), true);
         $completa = !$this->option('escuela');
         if (!$completa) {
-            $escuelas = array_values(array_filter($escuelas, fn ($e) => $e['codigo'] === $this->option('escuela')));
+            $escuelas = array_values(array_filter($escuelas, fn($e) => $e['codigo'] === $this->option('escuela')));
         }
         if (!$escuelas) {
             $this->error('No hay escuelas para sincronizar.');
@@ -33,8 +33,13 @@ class SincronizarHorariosSga extends Command
         }
 
         $periodoId = (int) $this->argument('periodo');
-        $r = $servicio->sincronizar($periodoId, $this->argument('codigo') ?? config('sga.periodo'), $escuelas, $completa,
-            fn ($e, $p, $m) => $this->line("{$e['codigo']} {$e['nombre']}: {$p} filas de programación, {$m} alumnos-sección"));
+        $r = $servicio->sincronizar(
+            $periodoId,
+            $this->argument('codigo') ?? config('sga.periodo'),
+            $escuelas,
+            $completa,
+            fn($e, $p, $m) => $this->line("{$e['codigo']} {$e['nombre']}: {$p} filas de programación, {$m} alumnos-sección")
+        );
 
         $this->info('Listo');
         $this->table(['Dato', 'Valor'], [
@@ -44,6 +49,8 @@ class SincronizarHorariosSga extends Command
             ['Alumnos del SGA que no están en estudiantes', $r['alumnos_sin_estudiante']],
             ['Bloques con partición', $r['slots_con_particion']],
             ['Valores de "tipo" en matriculados', json_encode($r['tipos'])],
+            ['Filas tipo G (por partición / por sección / sin cruce)', json_encode($r['g'])],
+            ['Cursos con grupos sin resolver', $r['ambiguos']],
         ]);
 
         if ($completa) {

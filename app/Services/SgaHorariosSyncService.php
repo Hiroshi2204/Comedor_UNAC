@@ -27,7 +27,12 @@ class SgaHorariosSyncService
             $programacion = array_merge($programacion, $p['programacionHoraria'] ?? []);
             // solo lo necesario: no se retienen nombres, DNI ni correos
             foreach ($m['alumnosMatriculados'] ?? [] as $a) {
-                $matriculados[] = ['eduSeccionId' => $a['eduSeccionId'] ?? null, 'codAlu' => $a['codAlu'] ?? null, 'tipo' => $a['tipo'] ?? null];
+                $matriculados[] = [
+                    'eduSeccionId'          => $a['eduSeccionId'] ?? null,
+                    'eduSeccionParticionId' => $a['eduSeccionParticionId'] ?? null,
+                    'codAlu'                => $a['codAlu'] ?? null,
+                    'tipo'                  => $a['tipo'] ?? null,
+                ];
             }
             if ($alAvanzar) $alAvanzar($e, count($p['programacionHoraria'] ?? []), count($m['alumnosMatriculados'] ?? []));
         }
@@ -76,6 +81,8 @@ class SgaHorariosSyncService
             'alumnos_sin_estudiante'  => $r['alumnos_sin_estudiante'],
             'tipos'                   => $r['tipos'],
             'slots_con_particion'     => $r['slots_con_particion'],
+            'g'                       => $r['g'],
+            'ambiguos'                => $r['ambiguos'],
         ];
     }
 }
