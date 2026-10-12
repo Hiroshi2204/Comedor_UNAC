@@ -20,11 +20,13 @@ class Ticket extends Model
         'estado',
         'codigo_qr',
         'fecha_hora_recojo',
+        'vence_at',
     ];
 
     protected $casts = [
         'fecha' => 'date',
         'fecha_hora_recojo' => 'datetime',
+        'vence_at' => 'datetime',
     ];
 
     protected static function booted(): void

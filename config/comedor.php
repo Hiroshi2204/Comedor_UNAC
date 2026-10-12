@@ -9,6 +9,23 @@ return [
     'servicios' => [
         'desayuno' => ['inicio' => '07:00', 'fin' => '08:00', 'stock' => 600],
         'almuerzo' => ['inicio' => '12:00', 'fin' => '15:00', 'stock' => 2200],
-        'cena'     => ['inicio' => '18:00', 'fin' => '20:30', 'stock' => 300],
+        'cena'     => ['inicio' => '18:00', 'fin' => '19:30', 'stock' => 300],
+    ],
+    'reserva' => [
+        'abre'           => '18:00',  // hora del día anterior desde la que los becados pueden reservar
+        'tolerancia_min' => 15,       // minutos extra para recoger después de terminar su franja
+    ],
+    'ticket' => [
+        'vigencia_min'     => 15,
+        'anticipacion_min' => 5,
+        'cierre_min_antes' => 5,
+    ],
+    'no_becados' => [
+        'factor_reserva'          => 1.0,
+        'libera_min_antes_cierre' => 30,
+    ],
+    'no_becados' => [
+        'factor_reserva'          => 1.0, // 1 = se reserva un cupo por cada becado elegible que aún no genera
+        'libera_min_antes_cierre' => 30,  // en los últimos N minutos la reserva se libera
     ],
 ];

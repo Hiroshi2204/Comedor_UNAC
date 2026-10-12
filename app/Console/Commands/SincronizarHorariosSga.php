@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Becado;
 use App\Services\SgaHorariosSyncService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 
 class SincronizarHorariosSga extends Command
 {
@@ -57,6 +58,9 @@ class SincronizarHorariosSga extends Command
             $sin = Becado::where('periodo_academico_id', $periodoId)->where('estado', 'activo')
                 ->whereDoesntHave('estudiante.horariosClase')->count();
             $this->warn("Becados activos SIN ningún horario (no podrán sacar ticket): {$sin}");
+        }
+        foreach (range(0, 7) as $i) {
+            Cache::forget('comedor.elegibles.' . today()->addDays($i)->toDateString());
         }
         return self::SUCCESS;
     }

@@ -28,6 +28,7 @@ return new class extends Migration
      ->default('generado');
             $table->string('codigo_qr', 64)->unique();
             $table->dateTime('fecha_hora_recojo')->nullable();
+            $table->dateTime('vence_at')->nullable();
             $table->timestamps();
 
             $table->unique(['estudiante_id', 'fecha', 'servicio']);
