@@ -28,4 +28,9 @@ return [
         'factor_reserva'          => 1.0, // 1 = se reserva un cupo por cada becado elegible que aún no genera
         'libera_min_antes_cierre' => 30,  // en los últimos N minutos la reserva se libera
     ],
+    'escaneo' => [
+        'entrega_min'       => 20,    // minutos extra para recoger la comida tras pasar la puerta
+        'gracia_cierre_min' => 20,    // tolerancia después del cierre del servicio
+        'exigir_puerta'     => true,  // sin validación en puerta no se entrega
+    ],
 ];

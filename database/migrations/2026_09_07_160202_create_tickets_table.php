@@ -24,10 +24,12 @@ return new class extends Migration
             $table->enum('tipo', ['becado', 'no_becado']);
             $table->enum('servicio', ['desayuno', 'almuerzo', 'cena']);
             $table->date('fecha');
-            $table->enum('estado', ['generado', 'cancelado', 'recogido', 'no_recogido', 'vencido'])
-     ->default('generado');
+            $table->enum('estado', ['generado', 'validado', 'cancelado', 'recogido', 'no_recogido', 'vencido'])
+                ->default('generado');
             $table->string('codigo_qr', 64)->unique();
             $table->dateTime('fecha_hora_recojo')->nullable();
+            $table->dateTime('validado_at')->nullable();
+            $table->foreignId('validado_por')->nullable()->constrained('usuarios_sistema')->nullOnDelete();
             $table->dateTime('vence_at')->nullable();
             $table->timestamps();
 

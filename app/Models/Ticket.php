@@ -27,6 +27,7 @@ class Ticket extends Model
         'fecha' => 'date',
         'fecha_hora_recojo' => 'datetime',
         'vence_at' => 'datetime',
+        'validado_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -73,5 +74,10 @@ class Ticket extends Model
     public function inasistencia()
     {
         return $this->hasOne(Inasistencia::class);
+    }
+
+    public function validadoPor()
+    {
+        return $this->belongsTo(UsuarioSistema::class, 'validado_por');
     }
 }
