@@ -22,9 +22,12 @@ class EscanearTicket extends Command
             return self::FAILURE;
         }
 
-        $trabajador = $this->option('trabajador') ? UsuarioSistema::find($this->option('trabajador')) : UsuarioSistema::first();
+        $puestoUsuario = $puesto === 'puerta' ? 'puerta' : 'cocina';
+        $trabajador = $this->option('trabajador')
+            ? UsuarioSistema::find($this->option('trabajador'))
+            : UsuarioSistema::where('rol', 'trabajador')->where('puesto', $puestoUsuario)->where('activo', true)->first();
         if (!$trabajador) {
-            $this->error('No hay usuario del sistema para usar como trabajador.');
+            $this->error("No hay un trabajador activo con puesto {$puestoUsuario}. Créalo o indica --trabajador=ID.");
             return self::FAILURE;
         }
 

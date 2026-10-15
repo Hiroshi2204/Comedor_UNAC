@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('sga:sincronizar-horarios 1')->dailyAt('03:00');
+        $schedule->command('comedor:cerrar-tickets')->everyMinute()->weekdays()->between('06:30', '21:45')->withoutOverlapping();
     }
 
     /**

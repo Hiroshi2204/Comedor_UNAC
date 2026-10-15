@@ -33,6 +33,20 @@ class EscaneoTicketService
     private function procesar(string $puesto, string $codigo, UsuarioSistema $trabajador, Carbon $ahora): array
     {
         $codigo = trim($codigo);
+        if (!$trabajador->puedeEscanear($puesto)) {
+            EscaneoTicket::create([
+                'ticket_id'     => null,
+                'codigo_qr'     => Str::limit($codigo, 64, ''),
+                'puesto'        => $puesto,
+                'trabajador_id' => $trabajador->id,
+                'exitoso'       => false,
+                'resultado'     => 'sin_permiso',
+            ]);
+
+            return $this->resultado(false, 'sin_permiso', $puesto === 'puerta'
+                ? 'Solo el personal de la puerta puede validar el ingreso.'
+                : 'Solo el personal de cocina puede entregar la comida.');
+        }
 
         return DB::transaction(function () use ($puesto, $codigo, $trabajador, $ahora) {
             // el bloqueo evita que dos trabajadores procesen el mismo QR a la vez

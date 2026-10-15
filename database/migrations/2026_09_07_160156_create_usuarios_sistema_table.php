@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('username', 100)->unique();
             $table->string('password');
             $table->enum('rol', ['administrador', 'trabajador']);
+            $table->enum('puesto', ['puerta', 'cocina'])->nullable(); // solo para trabajadores
             $table->boolean('activo')->default(true);
             $table->rememberToken();
             $table->timestamps();

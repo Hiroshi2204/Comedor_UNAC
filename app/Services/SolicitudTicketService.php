@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 class SolicitudTicketService
 {
     private const DIAS = [1 => 'lunes', 2 => 'martes', 3 => 'miercoles', 4 => 'jueves', 5 => 'viernes', 6 => 'sabado'];
-    private const NO_CUENTAN = ['cancelado', 'vencido'];
+    private const NO_CUENTAN = ['cancelado', 'vencido', 'no_recogido'];
 
     private PlanificadorComedor $planificador;
 
@@ -48,7 +48,9 @@ class SolicitudTicketService
         $mios = Ticket::where('estudiante_id', $e->id)->where('fecha', $fecha->toDateString())->get()->keyBy('servicio');
         $ventanas = VentanaAtencion::where('activo', true)->orderBy('hora_inicio')->get()->groupBy('servicio');
         $usadosFranja = $modo === 'reserva' ? $this->usadosPorFranja($fecha) : collect();
-        $libre = $modo === 'ahora' ? $this->planificador->libreAhora($clases, $ahora->format('H:i')) : true;
+        $libre = $modo === 'ahora'
+            ? (config('comedor.permitir_ticket_en_clase') || $this->planificador->libreAhora($clases, $ahora->format('H:i')))
+            : true;
         $elegibles = $modo === 'ahora' ? $this->elegibles->para($fecha) : [];
 
         $servicios = [];
@@ -124,7 +126,7 @@ class SolicitudTicketService
             'agotado'     => throw new TicketNoDisponible($esBecado
                 ? "Se agotaron los cupos de {$servicio} para ese día."
                 : "Por ahora no hay cupos para no becados de {$servicio}. Si sobran, se abren en los últimos "
-                    . config('comedor.no_becados.libera_min_antes_cierre') . ' minutos.'),
+                . config('comedor.no_becados.libera_min_antes_cierre') . ' minutos.'),
         };
 
         if ($reserva && !collect($s['franjas'])->contains('ventana_id', $ventanaId)) {
@@ -152,7 +154,7 @@ class SolicitudTicketService
                         throw new TicketNoDisponible("Se agotaron los cupos de {$servicio}.");
                     }
                     $hms = $ahora->format('H:i:s');
-                    $v = $franjas->first(fn ($f) => $f->hora_inicio <= $hms && $hms < $f->hora_fin)
+                    $v = $franjas->first(fn($f) => $f->hora_inicio <= $hms && $hms < $f->hora_fin)
                         ?? ($hms < $franjas->first()->hora_inicio ? $franjas->first() : $franjas->last());
                     $vence = $ahora->copy()->addMinutes(config('comedor.ticket.vigencia_min'));
                 }
@@ -182,7 +184,7 @@ class SolicitudTicketService
         if ($fecha->dayOfWeekIso > 6) return 'El comedor atiende de lunes a sábado.';
         if ($modo === null) return 'Solo puedes pedir tickets para hoy o para mañana.';
         if (!$e->matriculado) return 'No figuras como matriculado.';
-        if ($e->sancionActiva) return 'Tienes una sanción activa.';
+        if ($e->sancionActiva) return 'Tienes una sanción por inasistencias. Comunícate con el administrador del comedor para que la levante.';
 
         if ($modo === 'reserva') {
             if (!$esBecado) return 'Los no becados solo pueden generar su ticket el mismo día.';
@@ -230,8 +232,12 @@ class SolicitudTicketService
         $minParaCierre = intdiv(max(0, $this->hora($fecha, $cfg['fin'])->timestamp - $ahora->timestamp), 60);
 
         return CupoComedor::paraNoBecados(
-            $cfg['stock'], $total, $becados, $elegibles,
-            config('comedor.no_becados.factor_reserva'), $minParaCierre,
+            $cfg['stock'],
+            $total,
+            $becados,
+            $elegibles,
+            config('comedor.no_becados.factor_reserva'),
+            $minParaCierre,
             config('comedor.no_becados.libera_min_antes_cierre')
         );
     }
@@ -248,10 +254,10 @@ class SolicitudTicketService
         return HorarioClase::where('estudiante_id', $e->id)
             ->where('periodo_academico_id', $e->periodo_academico_id)
             ->where('dia_semana', self::DIAS[$fecha->dayOfWeekIso])
-            ->where(fn ($q) => $q->whereNull('fecha_inicio')->orWhere('fecha_inicio', '<=', $f))
-            ->where(fn ($q) => $q->whereNull('fecha_fin')->orWhere('fecha_fin', '>=', $f))
+            ->where(fn($q) => $q->whereNull('fecha_inicio')->orWhere('fecha_inicio', '<=', $f))
+            ->where(fn($q) => $q->whereNull('fecha_fin')->orWhere('fecha_fin', '>=', $f))
             ->get(['hora_inicio', 'hora_fin'])
-            ->map(fn ($c) => [substr($c->hora_inicio, 0, 5), substr($c->hora_fin, 0, 5)])
+            ->map(fn($c) => [substr($c->hora_inicio, 0, 5), substr($c->hora_fin, 0, 5)])
             ->all();
     }
 }

@@ -7,4 +7,5 @@ return [
     'periodo'       => env('SGA_PERIODO', '2026B'),
     'calendario'    => env('SGA_CALENDARIO_ACADEMICO_ID'),
     'escuelas_json' => storage_path('app/sga/escuelas.json'),
+    'login_url' => env('SGA_LOGIN_URL'),
 ];

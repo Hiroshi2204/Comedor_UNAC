@@ -13,7 +13,7 @@ class UsuarioSistema extends Authenticatable
 
     protected $table = 'usuarios_sistema';
 
-    protected $fillable = ['nombre', 'email', 'username', 'password', 'rol', 'activo'];
+    protected $fillable = ['nombre', 'email', 'username', 'password', 'rol', 'puesto', 'activo'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -35,5 +35,24 @@ class UsuarioSistema extends Authenticatable
     public function esTrabajador(): bool
     {
         return $this->rol === 'trabajador';
+    }
+    public function esDePuerta(): bool
+    {
+        return $this->esTrabajador() && $this->puesto === 'puerta';
+    }
+
+    public function esDeCocina(): bool
+    {
+        return $this->esTrabajador() && $this->puesto === 'cocina';
+    }
+
+    /** $escaneo: 'puerta' (valida el ingreso) o 'entrega' (cocina entrega la comida). */
+    public function puedeEscanear(string $escaneo): bool
+    {
+        return $this->activo && match ($escaneo) {
+            'puerta'  => $this->esDePuerta(),
+            'entrega' => $this->esDeCocina(),
+            default   => false,
+        };
     }
 }

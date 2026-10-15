@@ -33,4 +33,11 @@ return [
         'gracia_cierre_min' => 20,    // tolerancia después del cierre del servicio
         'exigir_puerta'     => true,  // sin validación en puerta no se entrega
     ],
+    'inasistencias' => [
+        'limite'       => 3,   // inasistencias que activan una sanción
+        'sancion_dias' => 0,   // duración de la sanción
+    ],
+
+    'permitir_ticket_en_clase' => env('COMEDOR_PERMITIR_EN_CLASE', false),
+
 ];
