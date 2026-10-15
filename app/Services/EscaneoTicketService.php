@@ -30,6 +30,21 @@ class EscaneoTicketService
         return $this->procesar('entrega', $codigo, $trabajador, $ahora ?? now());
     }
 
+    /**
+     * Revisa un ticket SIN modificarlo (pantalla "Verificar ticket").
+     * @return array{rechazo: ?array, ficha: array}  rechazo = [codigo, mensaje] o null si procede
+     */
+    public function consultar(Ticket $t, string $puesto, ?Carbon $ahora = null): array
+    {
+        $t->loadMissing(['estudiante', 'ventanaAtencion']);
+        $ahora ??= now();
+
+        return [
+            'rechazo' => $this->reglas->evaluar($this->datos($t), $puesto, $ahora->toImmutable()),
+            'ficha'   => $this->ficha($t),
+        ];
+    }
+
     private function procesar(string $puesto, string $codigo, UsuarioSistema $trabajador, Carbon $ahora): array
     {
         $codigo = trim($codigo);

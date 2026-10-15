@@ -80,4 +80,9 @@ class Ticket extends Model
     {
         return $this->belongsTo(UsuarioSistema::class, 'validado_por');
     }
+    /** Código legible para mostrar (no es el contenido del QR). Si existe una columna `codigo`, se respeta. */
+    public function getCodigoAttribute($valor): string
+    {
+        return $valor ?: sprintf('TK-%s-%05d', $this->fecha?->format('Y') ?? date('Y'), $this->id);
+    }
 }

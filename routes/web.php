@@ -6,6 +6,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AccesoEstudianteController;
 use App\Http\Controllers\MiComedorController;
+use App\Http\Controllers\HistorialTicketsController;
+use App\Http\Controllers\Trabajador\AccesoTrabajadorController;
+use App\Http\Controllers\Trabajador\PanelTrabajadorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,5 +45,20 @@ Route::prefix('estudiante')->group(function () {
         Route::get('/inicio', [MiComedorController::class, 'index'])->name('estudiante.inicio');
         Route::post('/tickets', [MiComedorController::class, 'solicitar'])->middleware('throttle:20,1')->name('estudiante.tickets.solicitar');
         Route::post('/tickets/{ticket}/cancelar', [MiComedorController::class, 'cancelar'])->name('estudiante.tickets.cancelar');
+        Route::get('/tickets', [HistorialTicketsController::class, 'index'])->name('estudiante.tickets.historial');
+    });
+});
+
+Route::prefix('trabajador')->name('trabajador.')->group(function () {
+    Route::get('/ingresar', [AccesoTrabajadorController::class, 'formulario'])->name('login');
+    Route::post('/ingresar', [AccesoTrabajadorController::class, 'ingresar'])->middleware('throttle:60,1')->name('ingresar');
+    Route::post('/salir', [AccesoTrabajadorController::class, 'salir'])->name('salir');
+
+    Route::middleware('trabajador')->group(function () {
+        Route::get('/', [PanelTrabajadorController::class, 'inicio'])->name('inicio');
+        Route::post('/buscar', [PanelTrabajadorController::class, 'buscar'])->middleware('throttle:120,1')->name('buscar');
+        Route::get('/tickets/{ticket}', [PanelTrabajadorController::class, 'ver'])->name('ticket');
+        Route::post('/tickets/{ticket}/confirmar', [PanelTrabajadorController::class, 'confirmar'])->middleware('throttle:120,1')->name('confirmar');
+        Route::get('/actividad', [PanelTrabajadorController::class, 'actividad'])->name('actividad');
     });
 });

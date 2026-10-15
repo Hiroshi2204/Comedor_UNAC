@@ -13,4 +13,9 @@ class EscaneoTicket extends Model
     protected $fillable = ['ticket_id', 'codigo_qr', 'puesto', 'trabajador_id', 'exitoso', 'resultado'];
 
     protected $casts = ['exitoso' => 'boolean'];
+
+    public function ticket()
+    {
+        return $this->belongsTo(Ticket::class);
+    }
 }
