@@ -425,7 +425,7 @@ $hayFiltros = collect($filtros)->filter()->isNotEmpty();
                 <th>Fecha</th>
                 <th>Servicio</th>
                 <th>Horario</th>
-                <th>Código</th>
+                <!-- <th>Código</th> -->
                 <th>Estado</th>
                 <th>Detalle</th>
             </tr>
@@ -445,7 +445,7 @@ $hayFiltros = collect($filtros)->filter()->isNotEmpty();
                     @elseif ($t->vence_at)hasta {{ $t->vence_at->format('H:i') }}
                     @else — @endif
                 </td>
-                <td data-label="Código"><code>{{ $t->codigo ?: \Illuminate\Support\Str::limit($t->codigo_qr, 14, '…') }}</code></td>
+                <!-- <td data-label="Código"><code>{{ $t->codigo ?: \Illuminate\Support\Str::limit($t->codigo_qr, 14, '…') }}</code></td> -->
                 <td data-label="Estado"><span class="estado-chip e-{{ $t->estado }}">{{ $estadosTxt[$t->estado] ?? $t->estado }}</span></td>
                 <td data-label="Detalle">
                     @if ($t->estado === 'recogido')

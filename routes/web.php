@@ -9,6 +9,7 @@ use App\Http\Controllers\MiComedorController;
 use App\Http\Controllers\HistorialTicketsController;
 use App\Http\Controllers\Trabajador\AccesoTrabajadorController;
 use App\Http\Controllers\Trabajador\PanelTrabajadorController;
+use App\Http\Controllers\AccesoPruebasController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +48,13 @@ Route::prefix('estudiante')->group(function () {
         Route::post('/tickets/{ticket}/cancelar', [MiComedorController::class, 'cancelar'])->name('estudiante.tickets.cancelar');
         Route::get('/tickets', [HistorialTicketsController::class, 'index'])->name('estudiante.tickets.historial');
     });
+
+    if (AccesoPruebasController::habilitado()) {
+        Route::get('/acceso-pruebas', [AccesoPruebasController::class, 'formulario'])->name('estudiante.pruebas');
+        Route::post('/acceso-pruebas', [AccesoPruebasController::class, 'ingresar'])
+            ->middleware('throttle:30,1')->name('estudiante.pruebas.ingresar');
+    }
+
 });
 
 Route::prefix('trabajador')->name('trabajador.')->group(function () {
@@ -62,3 +70,4 @@ Route::prefix('trabajador')->name('trabajador.')->group(function () {
         Route::get('/actividad', [PanelTrabajadorController::class, 'actividad'])->name('actividad');
     });
 });
+

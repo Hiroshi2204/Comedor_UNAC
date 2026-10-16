@@ -40,4 +40,8 @@ return [
 
     'permitir_ticket_en_clase' => env('COMEDOR_PERMITIR_EN_CLASE', false),
 
+    'acceso_pruebas' => [
+        'activo' => env('ACCESO_PRUEBAS', false),
+    ],
+
 ];
