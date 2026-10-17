@@ -28,12 +28,18 @@ Route::get('/estudiantes/proximamente', [AccesoController::class, 'estudiantePro
 
 Route::middleware('guest:web')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:5,1');
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:20,1')->name('login.store');
 });
 
 Route::middleware('auth:web')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+});
+
+Route::middleware(['auth:web', 'admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // aquí irán admin.tickets, admin.estudiantes, admin.becados, admin.horarios, admin.ventanas,
+    // admin.sanciones, admin.reportes, admin.notificaciones, admin.usuarios y admin.configuracion:
+    // el menú lateral las activa solo, apenas existan esas rutas.
 });
 
 Route::prefix('estudiante')->group(function () {

@@ -16,8 +16,8 @@ return [
         'tolerancia_min' => 15,       // minutos extra para recoger después de terminar su franja
     ],
     'ticket' => [
-        'vigencia_min'     => 15,
-        'anticipacion_min' => 5,
+        'vigencia_min'     => 30,  // tiempo de validez del ticket desde que se genera
+        'anticipacion_min' => 10,
         'cierre_min_antes' => 5,
     ],
     'no_becados' => [
@@ -29,7 +29,7 @@ return [
         'libera_min_antes_cierre' => 30,  // en los últimos N minutos la reserva se libera
     ],
     'escaneo' => [
-        'entrega_min'       => 20,    // minutos extra para recoger la comida tras pasar la puerta
+        'entrega_min'       => 30,    // minutos extra para recoger la comida tras pasar la puerta
         'gracia_cierre_min' => 20,    // tolerancia después del cierre del servicio
         'exigir_puerta'     => true,  // sin validación en puerta no se entrega
     ],

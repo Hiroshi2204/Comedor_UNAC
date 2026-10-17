@@ -42,7 +42,7 @@ class SolicitudTicketService
         $clases = $this->clases($e, $fecha);
         $plan = $this->planificador->planificar($clases);
         if (!$plan) {
-            return ['elegible' => false, 'motivo' => 'No tienes clases ese día.', 'modo' => $modo, 'tipo' => null, 'servicios' => []];
+            return ['elegible' => false, 'motivo' => 'No podrás sacar ticket.', 'modo' => $modo, 'tipo' => null, 'servicios' => []];
         }
 
         $mios = Ticket::where('estudiante_id', $e->id)->where('fecha', $fecha->toDateString())->get()->keyBy('servicio');

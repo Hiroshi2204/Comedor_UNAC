@@ -1,0 +1,137 @@
+/* ==========================================================================
+   Panel del administrador — Comedor UNAC
+   Basado en el modelo de Figma "Dashboard" (barra lateral azul + contenido).
+   Todo va bajo body.admin para no chocar con los estilos de otros paneles.
+   ========================================================================== */
+body.admin {
+    --azul: #12356B;  --azul-activo: #2C5C9E;  --azul-btn: #1E73BE;
+    --tinta: #0F2447; --gris: #64748B; --borde: #E1E8F2; --fondo: #F4F6FB; --claro: #CFE0F4;
+    --c-azul: #1E73BE; --c-verde: #22A66B; --c-naranja: #F08A1C; --c-rojo: #DC2B35;
+    --c-morado: #6B3FA0; --c-gris: #94A3B8;
+
+    margin: 0;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--fondo);
+    color: var(--tinta);
+    -webkit-font-smoothing: antialiased;
+}
+.admin * { box-sizing: border-box; }
+.admin a { color: inherit; text-decoration: none; }
+.admin button { font: inherit; cursor: pointer; }
+.admin :focus-visible { outline: 2px solid var(--azul-btn); outline-offset: 2px; }
+
+/* ---------- Barra lateral ---------- */
+.admin .lateral {
+    background: var(--azul); color: #fff;
+    height: 100vh; position: sticky; top: 0;
+    display: flex; flex-direction: column; padding: 28px 16px 20px;
+}
+.admin .marca { padding: 0 8px 18px; border-bottom: 1px solid rgba(255, 255, 255, .14); }
+.admin .siglas { font-size: 1.45rem; font-weight: 700; line-height: 1; }
+.admin .nombre { margin-top: 6px; font-size: .62rem; font-weight: 700; letter-spacing: .08em; color: var(--claro); }
+.admin .lateral nav { margin-top: 16px; display: flex; flex-direction: column; gap: 4px; flex: 1; overflow-y: auto; }
+.admin .item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+    border-radius: 8px; font-size: .84rem; color: #DCE7F7;
+}
+.admin a.item:hover { background: rgba(255, 255, 255, .08); }
+.admin .item.activo { background: var(--azul-activo); color: #fff; font-weight: 600; }
+.admin .item.deshabilitado { opacity: .42; cursor: default; }
+.admin .item svg { width: 16px; height: 16px; flex: none; }
+
+.admin .usuario { border-top: 1px solid rgba(255, 255, 255, .14); padding: 16px 8px 0; }
+.admin .usuario .fila { display: flex; align-items: center; gap: 10px; }
+.admin .usuario strong { display: block; font-size: .8rem; }
+.admin .usuario small { display: block; font-size: .68rem; color: var(--claro); word-break: break-all; }
+.admin .avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: #E6EEFB; color: var(--azul); font-size: .78rem; font-weight: 700;
+}
+.admin .avatar.azul { background: var(--azul-btn); color: #fff; }
+.admin .salir {
+    margin-top: 12px; width: 100%; padding: 8px; font-size: .78rem; font-weight: 600; color: #fff;
+    background: transparent; border: 1px solid rgba(255, 255, 255, .28); border-radius: 8px;
+}
+.admin .salir:hover { background: rgba(255, 255, 255, .1); }
+
+/* ---------- Contenido ---------- */
+.admin .contenido { min-width: 0; }
+.admin .barra { display: flex; justify-content: space-between; align-items: flex-start; padding: 28px 32px 0; }
+.admin .barra h1 { margin: 0; font-size: 1.45rem; font-weight: 700; }
+.admin .barra p { margin: 4px 0 0; font-size: .78rem; color: var(--gris); }
+.admin .derecha { display: flex; align-items: center; gap: 12px; }
+.admin .etiqueta-rol {
+    font-size: .66rem; font-weight: 700; letter-spacing: .04em;
+    padding: 7px 18px; border-radius: 999px; background: #E6EEFB; color: var(--azul);
+}
+.admin main { padding: 20px 32px 40px; }
+
+/* ---------- Tarjetas y KPI ---------- */
+.admin .tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: 14px; padding: 20px 24px; }
+.admin .tarjeta h2 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 700; }
+.admin .vacio { margin: 18px 0 0; font-size: .86rem; color: var(--gris); }
+
+.admin .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 18px; }
+.admin .kpi {
+    background: #fff; border: 1px solid var(--borde); border-left: 4px solid var(--c-azul);
+    border-radius: 12px; padding: 14px 18px;
+}
+.admin .kpi.k-verde { border-left-color: var(--c-verde); }
+.admin .kpi.k-naranja { border-left-color: var(--c-naranja); }
+.admin .kpi.k-rojo { border-left-color: var(--c-rojo); }
+.admin .kpi .etq { font-size: .72rem; font-weight: 600; color: var(--gris); }
+.admin .kpi .valor { margin: 4px 0 2px; font-size: 1.9rem; font-weight: 700; line-height: 1.1; }
+.admin .kpi .detalle { font-size: .7rem; color: var(--gris); }
+
+.admin .dos { display: grid; grid-template-columns: 1.7fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+/* ---------- Barras ---------- */
+.admin .barras { margin-top: 22px; }
+.admin .fila-barra { display: grid; grid-template-columns: 108px 1fr 44px; align-items: center; gap: 12px; margin: 0 0 22px; }
+.admin .fila-barra .nom { font-size: .76rem; font-weight: 700; color: var(--gris); }
+.admin .fila-barra .num { font-size: .78rem; font-weight: 700; }
+.admin .pista { height: 16px; border-radius: 999px; background: #EEF1F7; overflow: hidden; }
+.admin .relleno { height: 100%; min-width: 12px; border-radius: 999px; }
+
+/* ---------- Ventanas ---------- */
+.admin .ventana { display: grid; grid-template-columns: 112px 1fr auto; align-items: center; gap: 14px; margin: 18px 0 0; }
+.admin .rango { padding: 9px 12px; border-radius: 999px; background: #EEF3FB; font-size: .74rem; font-weight: 700; text-align: center; white-space: nowrap; }
+.admin .grupo { font-size: .8rem; font-weight: 700; }
+.admin .grupo small { display: block; margin-top: 2px; font-size: .68rem; font-weight: 400; color: var(--gris); }
+
+/* ---------- Actividad ---------- */
+.admin .evento { display: grid; grid-template-columns: 14px 1fr auto; gap: 16px; align-items: start; padding: 12px 8px 4px 4px; }
+.admin .evento .punto { margin-top: 4px; width: 12px; height: 12px; }
+.admin .evento strong { display: block; font-size: .86rem; }
+.admin .evento small { display: block; margin-top: 2px; font-size: .72rem; color: var(--gris); }
+.admin .evento .hora { font-size: .78rem; font-weight: 700; color: var(--gris); }
+
+.admin .punto { width: 10px; height: 10px; border-radius: 50%; background: var(--c-azul); }
+.admin .c-azul { background: var(--c-azul); }
+.admin .c-verde { background: var(--c-verde); }
+.admin .c-naranja { background: var(--c-naranja); }
+.admin .c-rojo { background: var(--c-rojo); }
+.admin .c-morado { background: var(--c-morado); }
+.admin .c-gris { background: var(--c-gris); }
+
+.admin .actualizado { margin: 14px 4px 0; font-size: .7rem; color: var(--gris); }
+
+/* ---------- Pantallas pequeñas ---------- */
+@media (max-width: 1100px) {
+    .admin .kpis { grid-template-columns: repeat(2, 1fr); }
+    .admin .dos { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+    body.admin { display: block; }
+    .admin .lateral { position: static; height: auto; padding: 14px 14px 12px; }
+    .admin .lateral nav { flex-direction: row; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .admin .item { padding: 8px 10px; font-size: .78rem; }
+    .admin .usuario { margin-top: 12px; padding-top: 12px; }
+    .admin .barra { padding: 20px 16px 0; }
+    .admin main { padding: 16px 16px 32px; }
+    .admin .kpis { grid-template-columns: 1fr; }
+    .admin .fila-barra { grid-template-columns: 92px 1fr 36px; }
+}
