@@ -13,8 +13,8 @@ class PeriodoAcademicoSeeder extends Seeder
         PeriodoAcademico::firstOrCreate(
             ['nombre' => '2026-B'],
             [
-                'fecha_inicio' => '2026-03-16',
-                'fecha_fin' => '2026-07-25',
+                'fecha_inicio' => '2026-08-31',
+                'fecha_fin' => '2026-12-18',
                 'activo' => true,
             ]
         );

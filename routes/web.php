@@ -10,6 +10,17 @@ use App\Http\Controllers\HistorialTicketsController;
 use App\Http\Controllers\Trabajador\AccesoTrabajadorController;
 use App\Http\Controllers\Trabajador\PanelTrabajadorController;
 use App\Http\Controllers\AccesoPruebasController;
+use App\Http\Controllers\Admin\{
+    TicketsAdminController,
+    EstudiantesAdminController,
+    SancionesAdminController,
+    BecadosAdminController,
+    HorariosAdminController,
+    VentanasAdminController,
+    ReportesAdminController,
+    UsuariosAdminController,
+    ConfiguracionAdminController
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -37,9 +48,39 @@ Route::middleware('auth:web')->group(function () {
 
 Route::middleware(['auth:web', 'admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    // aquí irán admin.tickets, admin.estudiantes, admin.becados, admin.horarios, admin.ventanas,
-    // admin.sanciones, admin.reportes, admin.notificaciones, admin.usuarios y admin.configuracion:
-    // el menú lateral las activa solo, apenas existan esas rutas.
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/tickets', [TicketsAdminController::class, 'index'])->name('tickets');
+        Route::get('/tickets/exportar', [TicketsAdminController::class, 'exportar'])->name('tickets.exportar');
+        Route::get('/tickets/{ticket}', [TicketsAdminController::class, 'show'])->whereNumber('ticket')->name('tickets.show');
+
+        Route::get('/estudiantes', [EstudiantesAdminController::class, 'index'])->name('estudiantes');
+        Route::get('/estudiantes/{estudiante}', [EstudiantesAdminController::class, 'show'])->whereNumber('estudiante')->name('estudiantes.show');
+
+        Route::get('/sanciones', [SancionesAdminController::class, 'index'])->name('sanciones');
+        Route::post('/sanciones/{sancion}/levantar', [SancionesAdminController::class, 'levantar'])->whereNumber('sancion')->name('sanciones.levantar');
+
+        Route::get('/becados', [BecadosAdminController::class, 'index'])->name('becados');
+        Route::post('/becados/importar', [BecadosAdminController::class, 'importar'])->middleware('throttle:10,1')->name('becados.importar');
+        Route::get('/becados/{importacion}', [BecadosAdminController::class, 'show'])->whereNumber('importacion')->name('becados.show');
+        Route::post('/becados/{importacion}/procesar', [BecadosAdminController::class, 'procesar'])->whereNumber('importacion')->name('becados.procesar');
+
+        Route::get('/horarios', [HorariosAdminController::class, 'index'])->name('horarios');
+        Route::post('/horarios/sincronizar', [HorariosAdminController::class, 'sincronizar'])->name('horarios.sincronizar');
+
+        Route::get('/ventanas', [VentanasAdminController::class, 'index'])->name('ventanas');
+        Route::post('/ventanas/{servicio}', [VentanasAdminController::class, 'actualizar'])->name('ventanas.actualizar');
+
+        Route::get('/reportes', [ReportesAdminController::class, 'index'])->name('reportes');
+        Route::get('/reportes/exportar', [ReportesAdminController::class, 'exportar'])->name('reportes.exportar');
+
+        Route::get('/usuarios', [UsuariosAdminController::class, 'index'])->name('usuarios');
+        Route::post('/usuarios', [UsuariosAdminController::class, 'guardar'])->name('usuarios.guardar');
+        Route::put('/usuarios/{usuario}', [UsuariosAdminController::class, 'actualizar'])->whereNumber('usuario')->name('usuarios.actualizar');
+
+        Route::get('/configuracion', [ConfiguracionAdminController::class, 'index'])->name('configuracion');
+        Route::post('/configuracion', [ConfiguracionAdminController::class, 'guardar'])->name('configuracion.guardar');
+        Route::post('/configuracion/restablecer', [ConfiguracionAdminController::class, 'restablecer'])->name('configuracion.restablecer');
+    });
 });
 
 Route::prefix('estudiante')->group(function () {
@@ -60,7 +101,6 @@ Route::prefix('estudiante')->group(function () {
         Route::post('/acceso-pruebas', [AccesoPruebasController::class, 'ingresar'])
             ->middleware('throttle:30,1')->name('estudiante.pruebas.ingresar');
     }
-
 });
 
 Route::prefix('trabajador')->name('trabajador.')->group(function () {
@@ -76,4 +116,3 @@ Route::prefix('trabajador')->name('trabajador.')->group(function () {
         Route::get('/actividad', [PanelTrabajadorController::class, 'actividad'])->name('actividad');
     });
 });
-

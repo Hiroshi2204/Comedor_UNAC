@@ -2,9 +2,6 @@
     $usuario = $usuario ?? auth('web')->user();
     $activo = trim($__env->yieldContent('activo'));
     $inicial = mb_strtoupper(mb_substr($usuario->nombre ?? 'A', 0, 1));
-
-    // El WhatsApp del modelo se reemplazó por "Notificaciones" (el sistema ya no envía por WhatsApp).
-    // Un ítem se activa solo cuando existe su ruta; mientras tanto aparece atenuado.
     $menu = [
         ['dashboard',      'Dashboard',            'dashboard'],
         ['tickets',        'Tickets',              'admin.tickets'],
@@ -14,7 +11,6 @@
         ['ventanas',       'Ventanas de atención', 'admin.ventanas'],
         ['sanciones',      'Sanciones',            'admin.sanciones'],
         ['reportes',       'Reportes',             'admin.reportes'],
-        ['notificaciones', 'Notificaciones',       'admin.notificaciones'],
         ['usuarios',       'Usuarios',             'admin.usuarios'],
         ['configuracion',  'Configuración',        'admin.configuracion'],
     ];
