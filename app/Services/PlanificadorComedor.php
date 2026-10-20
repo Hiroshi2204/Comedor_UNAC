@@ -12,7 +12,7 @@ class PlanificadorComedor
 
     /**
      * @param  array $clases  [['07:15','09:00'], ['14:00','16:00']] (clases de UN día)
-     * @return array  ['almuerzo' => ['12:15','12:30',...], ...]  solo servicios elegibles con franja libre
+     * @return array  ['almuerzo' => ['12:15','12:30',...], ...]  solo servicios elegibles con franja disponible
      */
     public function planificar(array $clases): array
     {
@@ -20,21 +20,29 @@ class PlanificadorComedor
             return []; // sin clases ese día: no se genera ticket
         }
 
-        $iv = array_map(fn ($c) => [$this->min($c[0]), $this->min($c[1])], $clases);
+        $iv = array_map(fn($c) => [$this->min($c[0]), $this->min($c[1])], $clases);
         $primera = min(array_column($iv, 0));
         $ultima  = max(array_column($iv, 1));
 
         $elegibles = [
             'desayuno' => $primera >= $this->min($this->cfg['desayuno_inicio_desde'])
-                       && $primera <  $this->min($this->cfg['desayuno_inicio_hasta']),
+                && $primera <  $this->min($this->cfg['desayuno_inicio_hasta']),
             'almuerzo' => $primera < $this->min($this->cfg['servicios']['cena']['inicio']), // no solo-noche
             'cena'     => $ultima  > $this->min($this->cfg['cena_si_termina_despues']),
         ];
 
+        // Con COMEDOR_PERMITIR_EN_CLASE=true, tener clase durante todo el servicio no quita el derecho al ticket.
+        $permitirEnClase = !empty($this->cfg['permitir_ticket_en_clase']);
+
         $res = [];
         foreach ($elegibles as $servicio => $ok) {
             if (!$ok) continue;
-            $franjas = $this->franjasLibres($this->cfg['servicios'][$servicio], $iv);
+            $srv = $this->cfg['servicios'][$servicio];
+
+            $franjas = $this->franjasLibres($srv, $iv);
+            if (!$franjas && $permitirEnClase) {
+                $franjas = $this->todasLasFranjas($srv); // sin franja libre: se ofrecen todas
+            }
             if ($franjas) $res[$servicio] = $franjas;
         }
         return $res;
@@ -45,8 +53,10 @@ class PlanificadorComedor
     {
         $s = $this->min($hhmm);
         foreach ($clases as [$ini, $fin]) {
-            if ($s < $this->min($fin) + $this->cfg['margen_min']
-                && $s + $this->cfg['franja_min'] > $this->min($ini) - $this->cfg['margen_min']) {
+            if (
+                $s < $this->min($fin) + $this->cfg['margen_min']
+                && $s + $this->cfg['franja_min'] > $this->min($ini) - $this->cfg['margen_min']
+            ) {
                 return false;
             }
         }
@@ -62,11 +72,25 @@ class PlanificadorComedor
         for ($s = $this->min($srv['inicio']); $s + $paso <= $this->min($srv['fin']); $s += $paso) {
             $choca = false;
             foreach ($iv as [$a, $b]) {
-                if ($s < $b + $margen && $s + $paso > $a - $margen) { $choca = true; break; }
+                if ($s < $b + $margen && $s + $paso > $a - $margen) {
+                    $choca = true;
+                    break;
+                }
             }
             if (!$choca) $libres[] = sprintf('%02d:%02d', intdiv($s, 60), $s % 60);
         }
         return $libres;
+    }
+
+    /** Todas las franjas del servicio, sin mirar las clases. */
+    private function todasLasFranjas(array $srv): array
+    {
+        $paso = $this->cfg['franja_min'];
+        $todas = [];
+        for ($s = $this->min($srv['inicio']); $s + $paso <= $this->min($srv['fin']); $s += $paso) {
+            $todas[] = sprintf('%02d:%02d', intdiv($s, 60), $s % 60);
+        }
+        return $todas;
     }
 
     private function min(string $hhmm): int

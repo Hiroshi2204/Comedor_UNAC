@@ -21,10 +21,6 @@ return [
         'cierre_min_antes' => 5,
     ],
     'no_becados' => [
-        'factor_reserva'          => 1.0,
-        'libera_min_antes_cierre' => 30,
-    ],
-    'no_becados' => [
         'factor_reserva'          => 1.0, // 1 = se reserva un cupo por cada becado elegible que aún no genera
         'libera_min_antes_cierre' => 30,  // en los últimos N minutos la reserva se libera
     ],
@@ -38,10 +34,18 @@ return [
         'sancion_dias' => 0,   // duración de la sanción
     ],
 
-    'permitir_ticket_en_clase' => env('COMEDOR_PERMITIR_EN_CLASE', false),
+    // true = becados y no becados pueden pedir ticket aunque tengan clase en curso.
+    // Por defecto permitido; en .env: COMEDOR_PERMITIR_EN_CLASE=false para volver a bloquear.
+    'permitir_ticket_en_clase' => filter_var(env('COMEDOR_PERMITIR_EN_CLASE', true), FILTER_VALIDATE_BOOLEAN),
 
+    // Ruta del php.exe de línea de comandos para lanzar la sincronización desde el panel.
+    // Necesario en Windows/Laragon si el servidor web no tiene "php" en el PATH. Ej.: C:\laragon\bin\php\php-8.2.12-Win32-vs16-x64\php.exe
+    'php_cli' => env('PHP_CLI_BINARY'),
+
+    // Acceso de pruebas: nunca se activa en producción, aunque el .env lo pida.
     'acceso_pruebas' => [
-        'activo' => env('ACCESO_PRUEBAS', false),
+        'activo' => filter_var(env('ACCESO_PRUEBAS', false), FILTER_VALIDATE_BOOLEAN)
+            && env('APP_ENV') !== 'production',
     ],
 
 ];

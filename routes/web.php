@@ -66,6 +66,7 @@ Route::middleware(['auth:web', 'admin'])->group(function () {
 
         Route::get('/horarios', [HorariosAdminController::class, 'index'])->name('horarios');
         Route::post('/horarios/sincronizar', [HorariosAdminController::class, 'sincronizar'])->name('horarios.sincronizar');
+        Route::get('/horarios/progreso', [HorariosAdminController::class, 'progreso'])->name('horarios.progreso');
 
         Route::get('/ventanas', [VentanasAdminController::class, 'index'])->name('ventanas');
         Route::post('/ventanas/{servicio}', [VentanasAdminController::class, 'actualizar'])->name('ventanas.actualizar');

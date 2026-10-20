@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Estudiante;
 use App\Support\Periodo;
-use Illuminate\Support\Facades\Artisan;
+use App\Support\LanzadorSincronizacion;
+use App\Support\SincronizacionProgreso;
 use Illuminate\Support\Facades\DB;
 
 /** Estado de la sincronización de horarios con el SGA. */
@@ -36,22 +37,64 @@ class HorariosAdminController extends Controller
             'ultima'       => $ultima ? \Carbon\Carbon::parse($ultima) : null,
             'sinHorario'   => $sinHorario, 'escuelas' => $escuelas,
             'periodo'      => Periodo::etiqueta(), 'periodoId' => Periodo::id(),
-            'conCola'      => config('queue.default') !== 'sync',
+            'enCurso'      => Periodo::id() ? SincronizacionProgreso::activa((int) Periodo::id()) : false,
         ]);
     }
 
-    /** Solo con una cola real (database/redis): con "sync" la petición web se quedaría esperando minutos. */
+    /** JSON con el avance, consultado por la pantalla cada pocos segundos. */
+    public function progreso()
+    {
+        $id = (int) Periodo::id();
+        $e  = $id ? SincronizacionProgreso::obtener($id) : null;
+
+        if (!$e) {
+            return response()->json(['estado' => 'ninguna']);
+        }
+
+        $colgada = SincronizacionProgreso::colgada($e);
+        $fase = $e['fase'];
+        if ($colgada) {
+            $fase = $e['estado'] === 'en_cola'
+                ? 'El proceso no arrancó. Revisa storage/logs/sincronizacion-horarios.log o ejecuta el comando por consola.'
+                : 'No hay avances desde hace más de 15 minutos. Revisa storage/logs/sincronizacion-horarios.log.';
+        }
+        $total = (int) ($e['total'] ?? 0);
+
+        return response()->json([
+            'estado'     => $colgada ? 'detenida' : $e['estado'],
+            'fase'       => $fase,
+            'origen'     => $e['origen'] ?? null,
+            'total'      => $total,
+            'hechas'     => (int) ($e['hechas'] ?? 0),
+            'porcentaje' => $total > 0 ? min(100, (int) round(($e['hechas'] ?? 0) * 100 / $total)) : 0,
+            'lineas'     => $e['lineas'] ?? [],
+            'resultado'  => $e['resultado'] ?? null,
+            'extra'      => $e['extra'] ?? null,
+            'error'      => $e['error'] ?? null,
+            'inicio'     => $e['inicio'] ?? null,
+            'fin'        => $e['fin'] ?? null,
+            'ahora'      => time(),
+        ])->header('Cache-Control', 'no-store');
+    }
+
+    /** Lanza el comando en segundo plano (sin worker de colas) y deja el avance en caché. */
     public function sincronizar()
     {
-        if (config('queue.default') === 'sync') {
-            return back()->with('error', 'La sincronización es larga: ejecútala por consola o configura una cola (QUEUE_CONNECTION=database).');
-        }
         if (!Periodo::id()) {
             return back()->with('error', 'No se encontró el período académico activo.');
         }
 
-        Artisan::queue('sga:sincronizar-horarios', ['periodo' => Periodo::id()]);
+        if (SincronizacionProgreso::activa((int) Periodo::id())) {
+            return back()->with('error', 'Ya hay una sincronización en curso. Espera a que termine.');
+        }
 
-        return back()->with('ok', 'Sincronización en cola. Se ejecutará en cuanto el worker de colas la tome; actualiza esta pantalla en unos minutos.');
+        SincronizacionProgreso::encolar((int) Periodo::id(), auth('web')->id());
+
+        if ($error = LanzadorSincronizacion::lanzar((int) Periodo::id())) {
+            SincronizacionProgreso::fallar((int) Periodo::id(), $error);
+            return back()->with('error', $error);
+        }
+
+        return back()->with('ok', 'Sincronización iniciada. Abajo verás el avance en vivo.');
     }
 }

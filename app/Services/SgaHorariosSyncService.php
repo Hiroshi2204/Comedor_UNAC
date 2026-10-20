@@ -9,7 +9,7 @@ class SgaHorariosSyncService
 {
     public function __construct(private SgaClient $sga) {}
 
-    public function sincronizar(int $periodoId, string $codigoPeriodo, array $escuelas, bool $completa, ?callable $alAvanzar = null): array
+    public function sincronizar(int $periodoId, string $codigoPeriodo, array $escuelas, bool $completa, ?callable $alAvanzar = null, ?callable $alFase = null): array
     {
         $calendarioId = config('sga.calendario')
             ?? throw new \RuntimeException('Falta SGA_CALENDARIO_ACADEMICO_ID en el .env');
@@ -37,8 +37,13 @@ class SgaHorariosSyncService
             if ($alAvanzar) $alAvanzar($e, count($p['programacionHoraria'] ?? []), count($m['alumnosMatriculados'] ?? []));
         }
 
+        $fase = fn (string $t) => $alFase ? $alFase($t) : null;
+
+        $fase('Cruzando alumnos matriculados con la programación horaria…');
         $estudiantes = Estudiante::pluck('id', 'codigo_universitario')->all();
         $r = SgaHorariosCruce::cruzar($programacion, $matriculados, $estudiantes);
+
+        $fase('Guardando ' . number_format(count($r['horarios'])) . ' horarios en la base de datos…');
 
         DB::transaction(function () use ($r, $periodoId, $codigoPeriodo, $completa) {
             if ($completa) {
@@ -72,6 +77,8 @@ class SgaHorariosSyncService
                 }, $bloque));
             }
         });
+
+        $fase('Horarios guardados. Limpiando caché de elegibles…');
 
         return [
             'matriculados_filas'      => count($matriculados),
