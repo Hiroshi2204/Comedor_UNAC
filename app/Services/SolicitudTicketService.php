@@ -8,6 +8,7 @@ use App\Models\Estudiante;
 use App\Models\HorarioClase;
 use App\Models\Ticket;
 use App\Models\VentanaAtencion;
+use App\Support\FranjasComedor;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,9 @@ class SolicitudTicketService
     }
 
     /**
-     * Qué puede hacer el estudiante para una fecha (hoy = ticket al momento; mañana = reserva, solo becados).
+     * Qué puede hacer el estudiante para una fecha (hoy o mañana).
+     *  - Becados: eligen su FRANJA (hoy a cualquier hora, mañana desde las 18:00 de hoy), según los cupos de cada franja.
+     *  - No becados: ticket al momento (solo hoy), con el cupo que sobra tras reservar para los becados.
      */
     public function disponibilidad(Estudiante $e, ?Carbon $fecha = null, ?Carbon $ahora = null): array
     {
@@ -40,21 +43,25 @@ class SolicitudTicketService
         }
 
         $clases = $this->clases($e, $fecha);
-        $plan = $this->planificador->planificar($clases);
+        $plan = $this->planificador->planificar($clases);   // servicio => franjas que se le pueden ofrecer
         if (!$plan) {
-            return ['elegible' => false, 'motivo' => 'No podrás sacar ticket.', 'modo' => $modo, 'tipo' => null, 'servicios' => []];
+            return ['elegible' => false, 'motivo' => 'No tienes clases ese día.', 'modo' => $modo, 'tipo' => null, 'servicios' => []];
         }
 
+        $usaFranja = $esBecado;   // los becados siempre eligen franja
         $mios = Ticket::where('estudiante_id', $e->id)->where('fecha', $fecha->toDateString())->get()->keyBy('servicio');
         $ventanas = VentanaAtencion::where('activo', true)->orderBy('hora_inicio')->get()->groupBy('servicio');
-        $usadosFranja = $modo === 'reserva' ? $this->usadosPorFranja($fecha) : collect();
-        $libre = $modo === 'ahora'
-            ? (config('comedor.permitir_ticket_en_clase') || $this->planificador->libreAhora($clases, $ahora->format('H:i')))
-            : true;
-        $elegibles = $modo === 'ahora' ? $this->elegibles->para($fecha) : [];
+        $usadosFranja = $usaFranja ? $this->usadosPorFranja($fecha) : collect();
+
+        $permitirEnClase = (bool) config('comedor.permitir_ticket_en_clase', false);
+        $libre = (!$usaFranja && $modo === 'ahora' && !$permitirEnClase)
+            ? $this->planificador->libreAhora($clases, $ahora->format('H:i')) : true;
+        $elegibles = (!$usaFranja && $modo === 'ahora') ? $this->elegibles->para($fecha) : [];
+        $cierreFranja = (int) config('comedor.ticket.cierre_min_antes');
+        $ahoraI = $ahora->toImmutable();
 
         $servicios = [];
-        foreach ($plan as $servicio => $franjasLibres) {
+        foreach ($plan as $servicio => $franjasPlan) {
             $cfg    = config("comedor.servicios.{$servicio}");
             $abre   = $this->hora($fecha, $cfg['inicio'])->subMinutes(config('comedor.ticket.anticipacion_min'));
             $cierra = $this->hora($fecha, $cfg['fin'])->subMinutes(config('comedor.ticket.cierre_min_antes'));
@@ -62,12 +69,16 @@ class SolicitudTicketService
             $lista  = [];
             $cupos  = 0;
 
-            if ($modo === 'reserva') {
+            if ($usaFranja) {
                 foreach ($ventanas[$servicio] ?? [] as $v) {
                     $ini = substr($v->hora_inicio, 0, 5);
-                    if (!in_array($ini, $franjasLibres, true)) continue;
+                    $fin = substr($v->hora_fin, 0, 5);
+                    if (!in_array($ini, $franjasPlan, true)) continue;
+                    // hoy no se ofrecen franjas que ya terminaron (o están por terminar)
+                    if ($modo === 'ahora' && FranjasComedor::cerrada(['fin' => $fin], $ahoraI, $cierreFranja)) continue;
+
                     $c = max(0, $v->capacidad_maxima - ($usadosFranja[$v->id] ?? 0));
-                    $lista[] = ['ventana_id' => $v->id, 'inicio' => $ini, 'fin' => substr($v->hora_fin, 0, 5), 'cupos' => $c];
+                    $lista[] = ['ventana_id' => $v->id, 'inicio' => $ini, 'fin' => $fin, 'cupos' => $c];
                     $cupos += $c;
                 }
             } else {
@@ -75,15 +86,16 @@ class SolicitudTicketService
             }
 
             $estado = match (true) {
-                $t && $t->estado === 'cancelado'     => 'cancelado',
-                $t !== null                          => 'con_ticket',
-                $modo === 'reserva' && $cupos <= 0   => 'agotado',
-                $modo === 'reserva'                  => 'reservable',
-                $ahora->lt($abre)                    => 'aun_no_abre',
-                $ahora->gt($cierra)                  => 'cerrado',
-                !$libre                              => 'en_clase',
-                $cupos <= 0                          => 'agotado',
-                default                              => 'disponible',
+                $t && $t->estado === 'cancelado' => 'cancelado',
+                $t !== null                      => 'con_ticket',
+                $usaFranja && !$lista            => 'cerrado',      // ya no queda ninguna franja por elegir
+                $usaFranja && $cupos <= 0        => 'agotado',
+                $usaFranja                       => 'reservable',   // puede elegir franja
+                $ahora->lt($abre)                => 'aun_no_abre',
+                $ahora->gt($cierra)              => 'cerrado',
+                !$libre                          => 'en_clase',
+                $cupos <= 0                      => 'agotado',
+                default                          => 'disponible',
             };
 
             $servicios[$servicio] = [
@@ -92,7 +104,7 @@ class SolicitudTicketService
                 'abre'    => $abre->format('H:i'),
                 'cierra'  => $cierra->format('H:i'),
                 'cupos'   => $cupos,
-                'franjas' => $lista,   // solo en modo reserva
+                'franjas' => $lista,   // solo para becados
             ];
         }
 
@@ -100,7 +112,7 @@ class SolicitudTicketService
     }
 
     /**
-     * Fecha de hoy: ticket al momento (ignora $ventanaId). Fecha de mañana: reserva en la franja $ventanaId.
+     * Becados: $ventanaId = la franja elegida (hoy o mañana). No becados: ticket al momento (ignora $ventanaId).
      */
     public function solicitar(Estudiante $e, string $servicio, ?int $ventanaId = null, ?Carbon $fecha = null, ?Carbon $ahora = null): Ticket
     {
@@ -113,15 +125,17 @@ class SolicitudTicketService
         }
 
         $s = $disp['servicios'][$servicio] ?? throw new TicketNoDisponible('Ese servicio no te corresponde ese día según tu horario.');
-        $esBecado = $disp['tipo'] === 'becado';
-        $reserva  = $disp['modo'] === 'reserva';
+        $esBecado  = $disp['tipo'] === 'becado';
+        $usaFranja = $esBecado;
 
         match ($s['estado']) {
             'disponible', 'reservable' => null,
             'con_ticket'  => throw new TicketNoDisponible("Ya tienes un ticket de {$servicio} para ese día."),
             'cancelado'   => throw new TicketNoDisponible("Cancelaste el {$servicio} de ese día y no puedes volver a pedirlo."),
             'aun_no_abre' => throw new TicketNoDisponible("El {$servicio} aún no abre. Podrás pedirlo desde las {$s['abre']}."),
-            'cerrado'     => throw new TicketNoDisponible("Ya no se generan tickets de {$servicio} (cerró a las {$s['cierra']})."),
+            'cerrado'     => throw new TicketNoDisponible($usaFranja
+                ? "Ya no quedan franjas de {$servicio} para ese día."
+                : "Ya no se generan tickets de {$servicio} (cerró a las {$s['cierra']})."),
             'en_clase'    => throw new TicketNoDisponible('Estás en clase o por entrar a una. Pide tu ticket cuando estés libre.'),
             'agotado'     => throw new TicketNoDisponible($esBecado
                 ? "Se agotaron los cupos de {$servicio} para ese día."
@@ -129,24 +143,33 @@ class SolicitudTicketService
                 . config('comedor.no_becados.libera_min_antes_cierre') . ' minutos.'),
         };
 
-        if ($reserva && !collect($s['franjas'])->contains('ventana_id', $ventanaId)) {
+        if ($usaFranja && !collect($s['franjas'])->contains('ventana_id', $ventanaId)) {
             throw new TicketNoDisponible('Elige una franja disponible.');
         }
 
+        $esHoy = $fecha->eq($ahora->copy()->startOfDay());
+
         try {
-            return DB::transaction(function () use ($e, $servicio, $ventanaId, $fecha, $ahora, $esBecado, $reserva) {
+            return DB::transaction(function () use ($e, $servicio, $ventanaId, $fecha, $ahora, $esBecado, $usaFranja, $esHoy) {
                 // bloquea las franjas del servicio (siempre en el mismo orden): serializa las solicitudes y protege el cupo
                 $franjas = VentanaAtencion::where('servicio', $servicio)->orderBy('id')->lockForUpdate()->get();
-                $cfg = config("comedor.servicios.{$servicio}");
+                $cfg  = config("comedor.servicios.{$servicio}");
                 $tope = $this->hora($fecha, $cfg['fin']);
 
-                if ($reserva) {
+                if ($usaFranja) {
                     $v = $franjas->firstWhere('id', $ventanaId) ?? throw new TicketNoDisponible('Elige una franja disponible.');
+
+                    if ($esHoy && FranjasComedor::cerrada(['fin' => substr($v->hora_fin, 0, 5)], $ahora->toImmutable(), (int) config('comedor.ticket.cierre_min_antes'))) {
+                        throw new TicketNoDisponible('Esa franja ya cerró. Elige otra.');
+                    }
+
                     $usados = Ticket::where('ventana_atencion_id', $v->id)->where('fecha', $fecha->toDateString())
                         ->whereNotIn('estado', self::NO_CUENTAN)->count();
                     if ($usados >= $v->capacidad_maxima) {
                         throw new TicketNoDisponible('Esa franja ya no tiene cupos. Elige otra.');
                     }
+
+                    // vale hasta que termina su franja más la tolerancia
                     $vence = $this->hora($fecha, $v->hora_fin)->addMinutes(config('comedor.reserva.tolerancia_min'));
                 } else {
                     $elegibles = $this->elegibles->para($fecha)[$servicio] ?? 0;
@@ -219,7 +242,7 @@ class SolicitudTicketService
         return [(clone $q)->count(), (clone $q)->where('tipo', 'becado')->count()];
     }
 
-    /** Cupos del servicio para ticket al momento. Los becados toman del stock; los no becados, de lo que no está reservado. */
+    /** Cupos para el ticket al momento (no becados): lo que no está reservado para los becados que aún no piden. */
     private function cupos(string $servicio, bool $esBecado, Carbon $fecha, Carbon $ahora, int $elegibles): int
     {
         $cfg = config("comedor.servicios.{$servicio}");

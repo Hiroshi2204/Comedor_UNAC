@@ -14,7 +14,7 @@ class CerrarTickets extends Command
     public function handle(CierreTicketsService $servicio): int
     {
         $r = $servicio->cerrar($this->option('ahora') ? Carbon::parse($this->option('ahora')) : now());
-        $this->info("Vencidos: {$r['vencidos']} | No recogidos: {$r['no_recogidos']} | Sancionados: {$r['sancionados']} | Sanciones levantadas: {$r['levantadas']}");
+        $this->info("Reprogramados a la última franja: {$r['reprogramados']} | Vencidos: {$r['vencidos']} | No recogidos: {$r['no_recogidos']} | Sancionados: {$r['sancionados']} | Sanciones levantadas: {$r['levantadas']}");
         return self::SUCCESS;
     }
 }

@@ -28,6 +28,7 @@ class Ticket extends Model
         'fecha_hora_recojo' => 'datetime',
         'vence_at' => 'datetime',
         'validado_at' => 'datetime',
+        'ultima_oportunidad_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -84,5 +85,10 @@ class Ticket extends Model
     public function getCodigoAttribute($valor): string
     {
         return $valor ?: sprintf('TK-%s-%05d', $this->fecha?->format('Y') ?? date('Y'), $this->id);
+    }
+
+    public function getEnUltimaOportunidadAttribute(): bool
+    {
+        return $this->ultima_oportunidad_at !== null && $this->estado === 'generado';
     }
 }
