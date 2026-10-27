@@ -19,7 +19,8 @@ use App\Http\Controllers\Admin\{
     VentanasAdminController,
     ReportesAdminController,
     UsuariosAdminController,
-    ConfiguracionAdminController
+    ConfiguracionAdminController,
+    DemoAdminController
 };
 
 /*
@@ -81,6 +82,13 @@ Route::middleware(['auth:web', 'admin'])->group(function () {
         Route::get('/configuracion', [ConfiguracionAdminController::class, 'index'])->name('configuracion');
         Route::post('/configuracion', [ConfiguracionAdminController::class, 'guardar'])->name('configuracion.guardar');
         Route::post('/configuracion/restablecer', [ConfiguracionAdminController::class, 'restablecer'])->name('configuracion.restablecer');
+
+        // Modo demostración (solo si DEMO_RELOJ=true y fuera de producción)
+        Route::get('/demo', [DemoAdminController::class, 'index'])->name('demo');
+        Route::post('/demo/fijar', [DemoAdminController::class, 'fijar'])->name('demo.fijar');
+        Route::post('/demo/avanzar', [DemoAdminController::class, 'avanzar'])->name('demo.avanzar');
+        Route::post('/demo/desactivar', [DemoAdminController::class, 'desactivar'])->name('demo.desactivar');
+        Route::post('/demo/cerrar', [DemoAdminController::class, 'cerrar'])->name('demo.cerrar');
     });
 });
 

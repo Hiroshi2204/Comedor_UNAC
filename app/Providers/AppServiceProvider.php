@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \App\Support\RelojDemo::aplicar();
         \App\Support\Ajustes::aplicar();
     }
 }

@@ -42,6 +42,13 @@ return [
     // Necesario en Windows/Laragon si el servidor web no tiene "php" en el PATH. Ej.: C:\laragon\bin\php\php-8.2.12-Win32-vs16-x64\php.exe
     'php_cli' => env('PHP_CLI_BINARY'),
 
+    // Reloj de demostración: permite simular fecha y hora desde Admin > /admin/demo.
+    // Se activa con DEMO_RELOJ=true en el .env y nunca funciona en producción.
+    'demo' => [
+        'habilitado'     => filter_var(env('DEMO_RELOJ', false), FILTER_VALIDATE_BOOLEAN) && env('APP_ENV') !== 'production',
+        'comando_cierre' => env('DEMO_COMANDO_CIERRE', 'tickets:cerrar'),
+    ],
+
     // Acceso de pruebas: nunca se activa en producción, aunque el .env lo pida.
     'acceso_pruebas' => [
         'activo' => filter_var(env('ACCESO_PRUEBAS', false), FILTER_VALIDATE_BOOLEAN)
