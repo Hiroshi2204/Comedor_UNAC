@@ -1,0 +1,87 @@
+[
+    {
+        "codigo": "01",
+        "nombre": "ADMINISTRACIÓN",
+        "ad_org_id": "A33F21E339D74A68B2FC872F587FCDDE"
+    },
+    {
+        "codigo": "11",
+        "nombre": "CONTABILIDAD",
+        "ad_org_id": "FFCA4F0513734193950258579075A37C"
+    },
+    {
+        "codigo": "21",
+        "nombre": "ECONOMÍA",
+        "ad_org_id": "EA4E00FD451C46039A3E724885748C67"
+    },
+    {
+        "codigo": "31",
+        "nombre": "INGENIERÍA ELÉCTRICA",
+        "ad_org_id": "5B67D076125342D6BD6E2A7F528A153B"
+    },
+    {
+        "codigo": "32",
+        "nombre": "INGENIERÍA ELECTRÓNICA",
+        "ad_org_id": "1251035171F14BDCA8173AAD520450F4"
+    },
+    {
+        "codigo": "41",
+        "nombre": "INGENIERÍA DE ALIMENTOS",
+        "ad_org_id": "76DC6B35C1B442BB88BAFDA4308729AA"
+    },
+    {
+        "codigo": "42",
+        "nombre": "INGENIERÍA PESQUERA",
+        "ad_org_id": "F6C1CF38F7F24A6CBCFF17FA7D98DB11"
+    },
+    {
+        "codigo": "51",
+        "nombre": "INGENIERÍA INDUSTRIAL",
+        "ad_org_id": "DA13BF8526254283B3D4425E2EF64C77"
+    },
+    {
+        "codigo": "52",
+        "nombre": "INGENIERÍA DE SISTEMAS",
+        "ad_org_id": "F23D7DDC446E41B9BB95092BA611D27B"
+    },
+    {
+        "codigo": "61",
+        "nombre": "INGENIERÍA QUÍMICA",
+        "ad_org_id": "60BC1D3CD66C409F8CD32676B567D31E"
+    },
+    {
+        "codigo": "71",
+        "nombre": "INGENIERÍA MECÁNICA",
+        "ad_org_id": "A5C2E2C3064E4B788C449D21F6CF3887"
+    },
+    {
+        "codigo": "72",
+        "nombre": "INGENIERÍA EN ENERGÍA",
+        "ad_org_id": "D953FA18904B42D0878665B0278E2558"
+    },
+    {
+        "codigo": "81",
+        "nombre": "ENFERMERÍA",
+        "ad_org_id": "34DFD1649C0C468BAB0E2CFFE1F1698A"
+    },
+    {
+        "codigo": "91",
+        "nombre": "FÍSICA",
+        "ad_org_id": "A5BD49F87A5B4021ADA3BC5A8325D5B3"
+    },
+    {
+        "codigo": "92",
+        "nombre": "MATEMÁTICA",
+        "ad_org_id": "583CE71F09A6450BA9D1957194F387F0"
+    },
+    {
+        "codigo": "95",
+        "nombre": "INGENIERÍA AMBIENTAL Y DE RR.NN.",
+        "ad_org_id": "F9D518CD4B604A6DA850DA6894861B88"
+    },
+    {
+        "codigo": "99",
+        "nombre": "EDUCACIÓN FÍSICA",
+        "ad_org_id": "5BF62AE34287405BB63E2E123E12741A"
+    }
+]
