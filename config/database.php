@@ -59,10 +59,11 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                // Fuerza a PDO a iniciar SSL usando los certificados públicos del sistema
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA', '/etc/ssl/certs/ca-certificates.crt'),
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-            ]) : [],
+                // SSL solo si MYSQL_ATTR_SSL_CA está definido en el .env (por ejemplo, una base de datos en la nube
+                // que lo exige). Sin esa variable la conexión es normal, sin SSL.
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => env('MYSQL_ATTR_SSL_CA') ? env('MYSQL_SSL_VERIFICAR', false) : null,
+            ], fn ($v) => $v !== null && $v !== '') : [],
         ],
 
         'pgsql' => [
