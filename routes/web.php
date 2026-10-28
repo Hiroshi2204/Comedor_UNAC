@@ -39,8 +39,8 @@ Route::get('/estudiantes/proximamente', [AccesoController::class, 'estudiantePro
     ->name('estudiante.proximamente');
 
 Route::middleware('guest:web')->group(function () {
-    Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:20,1')->name('login.store');
+    Route::get('', [LoginController::class, 'create'])->name('login');
+    Route::post('', [LoginController::class, 'store'])->middleware('throttle:20,1')->name('login.store');
 });
 
 Route::middleware('auth:web')->group(function () {
