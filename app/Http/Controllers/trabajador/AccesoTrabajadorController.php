@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\RateLimiter;
 /** Login del personal (puerta y cocina) con cuenta local de `usuarios_sistema`. */
 class AccesoTrabajadorController extends Controller
 {
+
     public function formulario()
     {
         return Auth::guard('sistema')->check()
