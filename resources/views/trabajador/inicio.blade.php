@@ -346,8 +346,8 @@
     </header>
     <form class="buscar" method="POST" action="{{ route('trabajador.buscar') }}" id="form-buscar" autocomplete="off">
         @csrf
-        <input type="text" name="codigo" id="codigo" placeholder="Código del estudiante o código QR" maxlength="100"
-            autocapitalize="none" spellcheck="false" inputmode="text" required @if(!request('escanear')) autofocus @endif aria-label="Código del estudiante o código QR">
+        <input type="text" name="codigo" id="codigo" placeholder="Código del estudiante" maxlength="100"
+            autocapitalize="none" spellcheck="false" inputmode="text" required @if(!request('escanear')) autofocus @endif aria-label="Código del estudiante">
         <button class="btn btn-primario" style="margin-top:0">Buscar</button>
         <button type="button" class="btn btn-azul-claro" id="abrir-escaner">Escanear QR</button>
         @if ($operativo)

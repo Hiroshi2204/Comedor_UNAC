@@ -202,10 +202,10 @@ $hayFranjas = collect($d['servicios'] ?? [])->contains(fn ($x) => $x['estado'] =
                     <dt>Vale hasta</dt>
                     <dd class="medio">{{ $t->vence_at?->format('H:i') }}</dd>
                 </div>
-                <div>
+                <!-- <div>
                     <dt>Código</dt>
                     <dd class="medio">{{ $codigoTk }}</dd>
-                </div>
+                </div> -->
             </dl>
 
             @if ($t->estado === 'validado' || $d['modo'] === 'ahora')
