@@ -20,21 +20,21 @@
     <div class="dos">
         <section class="tarjeta">
             <h2>Sincronización con el SGA</h2>
-            <p class="sub">Descarga la programación horaria y los matriculados de {{ $escuelas ?: 'las' }} escuela(s) configuradas y reconstruye el horario de cada estudiante.</p>
+            <p class="sub">Programación horaria y los matriculados de {{ $escuelas ?: 'las' }} escuela(s) configuradas y reconstruye el horario de cada estudiante.</p>
             <dl class="ficha">
                 <div><dt>Período</dt><dd>{{ $periodo }}</dd></div>
                 <div><dt>Escuelas configuradas</dt><dd>{{ $escuelas }}</dd></div>
-                <div><dt>Automática</dt><dd>Todos los días 03:00</dd></div>
+                <!-- <div><dt>Automática</dt><dd>Todos los días 03:00</dd></div> -->
             </dl>
 
-            <div class="acciones">
+            <!-- <div class="acciones">
                 @if ($periodoId && !$enCurso)
                     <form method="POST" action="{{ route('admin.horarios.sincronizar') }}" data-una-vez
                           onsubmit="return confirm('Se iniciará una sincronización completa con el SGA. ¿Continuar?')">
                         @csrf <button type="submit" class="btn btn-primario">Sincronizar ahora</button>
                     </form>
                 @endif
-            </div>
+            </div> -->
         </section>
 
         <section class="tarjeta">
